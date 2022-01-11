@@ -263,6 +263,7 @@ var __docDbReinitializeContextFunc; // used to return reinitialize function obje
             linkNotInContext: 'Function is not allowed to operate on resources outside current collection. Make sure that the link provided, "%s", belongs to current collection.',
             invalidFunctionCall: 'The function "%s" requires at least %s argument(s) but was called with %s argument(s).',
             docBodyMustBeObjectOrString: 'The document body must be an object or a string representing a JSON-serialized object.',
+            patchSpecMustBeObjectOrArray: 'The patch-spec must be an object or array of operations',
             invalidParamType: 'The "%s" parameter must be of type %s. Actual type is: "%s".',
             jsQuery_callbackInvalidInChain: 'When using "chain", the callback parameter can only be provided on the "value" function.',
             jsQuery_optionsInvalidInChain: 'When using "chain", options can only be provided on the call to the "value" function',
@@ -2198,7 +2199,29 @@ function(continuationToken) {
  * @property {string} indexAction.default                    -         use the default indexing policy specified for this collection
  * @property {string} indexAction.include                    -         include this document in the index
  * @property {string} indexAction.exclude                    -         exclude this document from the index
- * @property {string} [etag]                                 -         <p>The entity tag associated with the resource.<br/>This is matched with the persisted resource before deletion.</p>
+ * @property {string} [etag]                                 -         <p>The entity tag associated with the resource.<br/>This is matched with the persisted resource before replace.</p>
+ * @memberof Collection
+ *
+ */
+
+/**
+ * PatchSpecification associated with patch operation.
+ * @typedef {Object|Array} PatchSpecification                -         PatchSpecification can either be an array of operations or an object
+ * @property {Array} [operations]                            -         Specifies the array of operations which needs to be applied on the document
+ * @property {Boolean} [isUpsert]                            -         Optional - Create the document if not exist and then apply patch operations on that
+ * @property {string} [setOnCreate]                          -         <p>Optional - If an update operation with isUpsert: true results in an insert of a document<br/>setOnCreate assigns the specified values to the fields in the document.<br/></p>
+ * @memberof Collection
+ * 
+ */
+
+/**
+ * Options associated with a replace operation.
+ * @typedef {Object} PatchOptions                            -         Options associated with a patch operation.
+ * @property {string} [indexAction]                          -         Specifies indexing directives.
+ * @property {string} indexAction.default                    -         use the default indexing policy specified for this collection
+ * @property {string} indexAction.include                    -         include this document in the index
+ * @property {string} indexAction.exclude                    -         exclude this document from the index
+ * @property {string} [etag]                                 -         <p>The entity tag associated with the resource.<br/>This is matched with the persisted resource before patch.</p>
  * @memberof Collection
  *
  */
