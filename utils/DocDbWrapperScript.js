@@ -816,6 +816,110 @@ var __docDbReinitializeContextFunc; // used to return reinitialize function obje
             };
             //---------------------------------------------------------------------------------------------------
             /**
+            * Patch a document under the collection.
+            * @name patchDocument
+            * @function
+            * @instance
+            * @memberof Collection
+            * @param {string} documentLink - resource link of the document to patch
+            * @param {Collection.PatchSpecification} patchSpec - <p>patchSpecification which needs to be applied to the document.<br/>
+            * @param {Collection.PatchOptions} [options] - optional patch options
+            * @param {Collection.RequestCallback} [callback] - <p>optional callback for the operation<br/>If no callback is provided, any error in the operation will be thrown.</p>
+            * @example // Example 1: Patch document with patch spec specified as array<br/>.
+function () {
+   var doc = {
+      "id": "exampleDoc",
+      "field1": {
+         "field2": 10,
+         "field3": 20
+      }
+   };
+   var isAccepted = __.createDocument(__.getSelfLink(), doc, (err, doc) => {
+         if (err) throw err;
+         var patchSpec = [
+            {"op": "add", "path": "/field1/field2", "value": 20}, 
+            {"op": "remove", "path": "/field1/field3"}
+         ];
+         isAccepted = __.patchDocument(doc._self, patchSpec, (err, doc) => {
+               if (err) throw err;
+               else {
+                  getContext().getResponse().setBody(docPatched);
+               }
+            }
+         }
+         if(!isAccepted) throw new Error("patch was't accepted")
+      }
+   }
+   if(!isAccepted) throw new Error("create wasn't accepted")
+}
+
+// Example 2: Patch document with patch spec specified as object<br/>.
+function () {
+   var docLink = "dbs/db1/colls/coll1/docs/doc1"
+   var patchSpec = {
+      "isUpsert": true,
+      "setOnCreate": "{\"id\":\"doc1\"}",
+      "operations": [{
+         "op": "add",
+         "path": "/foo",
+         "value": 10
+      }]
+   }
+   var isAccepted = __.patchDocument(docLink, patchSpec, (err, doc) => {
+         if (err) throw err;
+         else {
+            getContext().getResponse().setBody(docPatched);
+         }
+      }
+   }
+   if(!isAccepted) throw new Error("patch was't accepted")
+}
+*/
+            this.patchDocument = function (documentLink, patchSpec, options, callback) {
+                if (arguments.length < 2) {
+                    throw new Error(ErrorCodes.BadRequest, sprintf(errorMessages.invalidFunctionCall, 'patchDocument', 2, arguments.length));
+                }
+                if (patchSpec === null || !(typeof patchSpec === "object" || Array.isArray(patchSpec))) {
+                    throw new Error(ErrorCodes.BadRequest, errorMessages.patchSpecMustBeObjectOrArray);
+                }
+
+                var documentIdTuple = validateDocumentLink(documentLink, false);
+                var collectionRid = documentIdTuple.collId;
+                var documentResourceIdentifier = documentIdTuple.docId;
+                var isNameRouted = documentIdTuple.isNameRouted;
+
+                patchSpec = JSON.stringify(patchSpec);
+
+                var optionsCallbackTuple = validateOptionsAndCallback(options, callback);
+                options = optionsCallbackTuple.options;
+                callback = optionsCallbackTuple.callback;
+
+                var etag = options.etag || '';
+                var indexAction = options.indexAction || '';
+                return collectionObjRaw.patch(
+                    collectionRid,
+                    documentResourceIdentifier,
+                    isNameRouted,
+                    patchSpec,
+                    etag,
+                    indexAction,
+                    function (err, response) {
+                        if (callback) {
+                            if (err) {
+                                callback(err);
+                            } else {
+                                callback(undefined, JSON.parse(response.body), response.options);
+                            }
+                        } else {
+                            if (err) {
+                                throw err;
+                            }
+                        }
+                    }
+                );
+            };
+            //---------------------------------------------------------------------------------------------------
+            /**
             * Delete a document.
             * @name deleteDocument
             * @function
